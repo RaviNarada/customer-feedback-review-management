@@ -10,5 +10,85 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String
+  email      String     @unique
+  password   String
+  role       Role       @default(TRAINEE)
+ 
+  feedbacks  Feedback[] @relation("TraineeFeedback")
+  responses  Response[] @relation("AdminResponse")
+ 
+  createdAt  DateTime   @default(now())
+}
+ 
+model Trainer {
+  id         Int      @id @default(autoincrement())
+  name       String
+  expertise  String?
+ 
+  courses    Course[]
+ 
+  createdAt  DateTime @default(now())
+}
+ 
+model Course {
+  id         Int        @id @default(autoincrement())
+  title      String
+  description String?
+ 
+  trainerId  Int
+  trainer    Trainer    @relation(fields: [trainerId], references: [id])
+ 
+  feedbacks  Feedback[]
+ 
+  createdAt  DateTime   @default(now())
+}
+ 
+model Feedback {
+  id          Int            @id @default(autoincrement())
+ 
+  rating      Int
+  review      String
+  sentiment   SentimentFive
+ 
+  traineeId   Int
+  courseId    Int
+ 
+  trainee     User     @relation("TraineeFeedback", fields: [traineeId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+ 
+  response    Response?
+ 
+  createdAt   DateTime @default(now())
+}
+ 
+model Response {
+  id          Int      @id @default(autoincrement())
+  message     String
+ 
+  adminId     Int
+  feedbackId  Int      @unique
+ 
+  admin       User     @relation("AdminResponse", fields: [adminId], references: [id])
+  feedback    Feedback @relation(fields: [feedbackId], references: [id])
+ 
+  createdAt   DateTime @default(now())
+}
+ 
+enum Role {
+  ADMIN
+  TRAINEE
+}
+ 
+enum SentimentFive {
+  VERY_POOR
+  POOR
+  NEUTRAL
+  GOOD
+  VERY_GOOD
 }
