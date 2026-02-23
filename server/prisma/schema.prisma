@@ -1,94 +1,81 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  trainerId   Int
+  createdAt   DateTime   @default(now())
+  trainer     Trainer    @relation(fields: [trainerId], references: [id], map: "Course_trainerId_fkey")
+  feedback    Feedback[]
+
+  @@index([trainerId], map: "Course_trainerId_fkey")
+}
+
+model Feedback {
+  id        Int                @id @default(autoincrement())
+  rating    Int
+  review    String
+  sentiment feedback_sentiment
+  traineeId Int
+  courseId  Int
+  createdAt DateTime           @default(now())
+  trainee   User               @relation(fields: [traineeId], references: [id], map: "Feedback_traineeId_fkey")
+  course    Course             @relation(fields: [courseId], references: [id], map: "Feedback_courseId_fkey")
+  response  Response?
+
+  @@index([traineeId], map: "Feedback_traineeId_fkey")
+  @@index([courseId], map: "Feedback_courseId_fkey")
+}
+
+model Response {
+  id        Int      @id @default(autoincrement())
+  message   String
+  adminId   Int
+  feedbackId Int
+  createdAt DateTime @default(now())
+  admin     User     @relation(fields: [adminId], references: [id], map: "Response_adminId_fkey")
+  feedback  Feedback @relation(fields: [feedbackId], references: [id], map: "Response_feedbackId_fkey")
+
+  @@index([adminId], map: "Response_adminId_fkey")
+  @@unique([feedbackId], map: "Response_feedbackId_key")
+}
+
+model Trainer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  expertise String?
+  createdAt DateTime @default(now())
+  course    Course[]
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  name       String
-  email      String     @unique
-  password   String
-  role       Role       @default(TRAINEE)
- 
-  feedbacks  Feedback[] @relation("TraineeFeedback")
-  responses  Response[] @relation("AdminResponse")
- 
-  createdAt  DateTime   @default(now())
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique(map: "User_email_key")
+  password  String
+  role      Role       @default(TRAINEE)
+  createdAt DateTime   @default(now())
+  feedback  Feedback[]
+  response  Response[]
 }
- 
-model Trainer {
-  id         Int      @id @default(autoincrement())
-  name       String
-  expertise  String?
- 
-  courses    Course[]
- 
-  createdAt  DateTime @default(now())
-}
- 
-model Course {
-  id         Int        @id @default(autoincrement())
-  title      String
-  description String?
- 
-  trainerId  Int
-  trainer    Trainer    @relation(fields: [trainerId], references: [id])
- 
-  feedbacks  Feedback[]
- 
-  createdAt  DateTime   @default(now())
-}
- 
-model Feedback {
-  id          Int            @id @default(autoincrement())
- 
-  rating      Int
-  review      String
-  sentiment   SentimentFive
- 
-  traineeId   Int
-  courseId    Int
- 
-  trainee     User     @relation("TraineeFeedback", fields: [traineeId], references: [id])
-  course      Course   @relation(fields: [courseId], references: [id])
- 
-  response    Response?
- 
-  createdAt   DateTime @default(now())
-}
- 
-model Response {
-  id          Int      @id @default(autoincrement())
-  message     String
- 
-  adminId     Int
-  feedbackId  Int      @unique
- 
-  admin       User     @relation("AdminResponse", fields: [adminId], references: [id])
-  feedback    Feedback @relation(fields: [feedbackId], references: [id])
- 
-  createdAt   DateTime @default(now())
-}
- 
-enum Role {
-  ADMIN
-  TRAINEE
-}
- 
-enum SentimentFive {
+
+enum feedback_sentiment {
   VERY_POOR
   POOR
   NEUTRAL
   GOOD
   VERY_GOOD
+}
+
+enum Role {
+  ADMIN
+  TRAINEE
 }

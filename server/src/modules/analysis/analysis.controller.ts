@@ -14,3 +14,21 @@ export const getFeedback = async (
   }
 };
 
+export const getSentiment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sentiments = await analysisService.getAllSentiment();
+    res.status(200).json(sentiments);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const test = async (req:Request,res:Response)=>{
+  console.log("hello world");
+  res.status(200).json({success:true,data:"hello world"})
+};
+

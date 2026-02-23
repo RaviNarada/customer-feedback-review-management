@@ -1,5 +1,8 @@
-const { PrismaClient } = require('@prisma/client')
+import { PrismaClient } from "@prisma/client";
 
-export const prisma = new PrismaClient()
+export const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'], // Logs SQL queries and errors
+});
 
-module.exports = prisma
+// Also export as default for compatibility
+export default prisma;
