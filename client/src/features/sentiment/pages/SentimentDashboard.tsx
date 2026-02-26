@@ -3,6 +3,7 @@ import SummaryOverview from "../components/SummaryOverview";
 import StatsCards from "../components/StatsCards";
 import SentimentDistribution from "../components/SentimentDistribution";
 import SentimentInsights from "../components/SentimentInsights";
+import ReportGeneration from "../components/ReportGeneration";
 
 const SentimentDashboard: React.FC = () => {
   // Dummy reviews (later replace with API)
@@ -117,6 +118,8 @@ const SentimentDashboard: React.FC = () => {
 
       {/* Insights */}
       <SentimentInsights />
+
+      <ReportGeneration />
     </div>
   );
 };

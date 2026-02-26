@@ -33,23 +33,25 @@ const ReportGeneration = () => {
   
   
     return (
-    <div className="fixed bottom-0 left-0 w-full bg-white p-6 shadow-lg">
-    <div>
-      <p className="w-full border-2 border-cyan-400 rounded-lg px-2 py-3 font-bold ">Report Generator</p>
+    <div className="shadow-xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 ">
+    <div className="pl-8 mt-3 ">
+      <p className="text-xl  font-semibold text-white ">📄 Report Generator</p>
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full px-4 py-3 border border-gray-300 rounded-xl 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 
-                       focus:border-blue-500 transition duration-200"
+        className=" w-11/12 mt-3 py-3 border border-gray-300 rounded-xl bg-gray-300 opacity-40
+                      text-black focus:bg-white focus:outline-none focus:ring-2 
+                       transition duration-200"
       />
-      <div className="flex justify-center">
+    </div>
+      <div className="flex justify-center ">
       <button onClick={handleExport} className="bg-purple-700 text-white px-3 py-3 rounded-xl 
                        hover:bg-indigo-500 active:scale-95 
-                       transition duration-200 font-medium shadow-md">download</button>
+                       transition duration-200 font-medium mt-3 shadow-md">download</button>
       </div>
-    </div>
+      <br></br>
+    
   </div>
   )
 }
