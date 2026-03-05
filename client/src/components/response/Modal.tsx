@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, User, BookOpen, Clock, Send } from 'lucide-react';
 import { StarRating } from './StarRating';
 import type { Feedback } from './lib/api';
+import './modal.css';
 
 const ratingColors: Record<string, string> = {
   'Very Good':  '#22c55e',

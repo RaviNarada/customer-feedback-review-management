@@ -2,6 +2,7 @@
 import { StarRating } from './StarRating';
 import type { Feedback } from './lib/api';
 import { User, MessageSquare, BookOpen, Clock } from 'lucide-react';
+import './feedback.css';
 
 const ratingColors: Record<string, string> = {
   'Very Good':  '#22c55e',

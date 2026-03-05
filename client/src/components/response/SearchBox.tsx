@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search } from 'lucide-react';
+import './filters.css';
 
 export function SearchBox({ value, onChange }: {
   value: string;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import './response.css';
 import { Header } from './Header';
 import { StatsGrid } from './StatsGrid';
 import { FilterDropdown } from './FilterDropdown';

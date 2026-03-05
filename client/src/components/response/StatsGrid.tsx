@@ -3,6 +3,7 @@ import {
 } from 'lucide-react';
 import { StatCard } from './StatCard';
 import type { Stats } from './lib/api';
+import './stats.css';
 
 export function StatsGrid({ stats }: { stats: Stats | null }) {
   return (

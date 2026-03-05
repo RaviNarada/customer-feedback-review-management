@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 import React from 'react';
+import './filters.css';
 
 export function FilterDropdown({
   options,

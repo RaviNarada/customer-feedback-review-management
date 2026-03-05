@@ -1,4 +1,5 @@
 import { MessageSquare, User } from 'lucide-react';
+import './Header.css';
 
 export function Header() {
   return (
