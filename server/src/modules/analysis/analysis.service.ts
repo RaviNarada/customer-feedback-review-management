@@ -16,13 +16,20 @@ export const getAllFeedback = async () => {
   return feedback_met;
 };
 
-export const getAllSentiment = async () => {
+export const getAllSentiment = async (name:string) => {
 
-const sentiment_got = await prisma.feedback.groupBy({
-  by:['sentiment'],
-  _count:{
-    sentiment:true,
-  },
+  const sentiment_got = await prisma.feedback.groupBy({
+    by:['sentiment'],
+    where:{
+        course:{
+          trainer:{
+            name:name
+          }
+        }
+    },
+    _count:{
+      sentiment:true
+    }
 });
 
 return sentiment_got;

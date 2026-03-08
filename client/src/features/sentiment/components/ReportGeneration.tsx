@@ -1,8 +1,11 @@
-import {useState} from 'react';
+type Props = {
+  name: string;
+  setName: React.Dispatch<React.SetStateAction<string>>;
+};
 
-const ReportGeneration = () => {
+const ReportGeneration = ({name,setName} : Props) => {
   
-    const [name,setName] = useState("");
+    
 
 
     const handleExport = async () => {
@@ -19,7 +22,7 @@ const ReportGeneration = () => {
         alert(errorData.message || "Something went wrong");
         return;
         }
-
+        
         const blob = await response.blob();
 
         const url = window.URL.createObjectURL(blob);

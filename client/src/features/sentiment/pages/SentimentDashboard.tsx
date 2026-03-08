@@ -1,84 +1,75 @@
 import React from "react";
+import {useState} from "react";
 import SummaryOverview from "../components/SummaryOverview";
 import StatsCards from "../components/StatsCards";
 import SentimentDistribution from "../components/SentimentDistribution";
 import SentimentInsights from "../components/SentimentInsights";
 import ReportGeneration from "../components/ReportGeneration";
+import AnalysisDataFetch from "../components/AnalysisDataFetch";
+import type { SentimentCount } from "../components/types";
 
 const SentimentDashboard: React.FC = () => {
+    
+
   // Dummy reviews (later replace with API)
-  const reviews = [
-    { id: 1, sentiment: "very_positive" },
-    { id: 2, sentiment: "positive" },
-    { id: 3, sentiment: "neutral" },
-    { id: 4, sentiment: "negative" },
-    { id: 5, sentiment: "very_positive" },
-    { id: 6, sentiment: "neutral" },
-    { id: 7, sentiment: "very_negative" },
-  { id: 8, sentiment: "very_negative" },
-  { id: 9, sentiment: "very_negative" },
+  const [name,setName] = useState("");
+  const [name1,setName1] = useState("");
+  const [reviews,setReviews] = useState<SentimentCount[]>([])
 
-  ];
+  
 
-  // Total
-  const totalReviews = reviews.length;
+  // const reviews = [
+  //   { id: 1, sentiment: "very_positive" },
+  //   { id: 2, sentiment: "positive" },
+  //   { id: 3, sentiment: "neutral" },
+  //   { id: 4, sentiment: "negative" },
+  //   { id: 5, sentiment: "very_positive" },
+  //   { id: 6, sentiment: "neutral" },
+  //   { id: 7, sentiment: "very_negative" },
+  // { id: 8, sentiment: "very_negative" },
+  // { id: 9, sentiment: "very_negative" },
 
-  // 5-Level Counts
-  const veryPositiveCount = reviews.filter(
-    (r) => r.sentiment === "very_positive"
-  ).length;
+  // ];
 
-  const positiveCount = reviews.filter(
-    (r) => r.sentiment === "positive"
-  ).length;
+ // Convert array → lookup object
+const sentimentMap = Object.fromEntries(
+  reviews.map((r) => [r.sentiment, r._count.sentiment])
+);
 
-  const neutralCount = reviews.filter(
-    (r) => r.sentiment === "neutral"
-  ).length;
+// Counts
+const veryPositiveCount = sentimentMap["VERY_GOOD"] ?? 0;
+const positiveCount = sentimentMap["GOOD"] ?? 0;
+const neutralCount = sentimentMap["NEUTRAL"] ?? 0;
+const negativeCount = sentimentMap["POOR"] ?? 0;
+const veryNegativeCount = sentimentMap["VERY_POOR"] ?? 0;
 
-  const negativeCount = reviews.filter(
-    (r) => r.sentiment === "negative"
-  ).length;
+// Total
+const totalReviews =
+  veryPositiveCount +
+  positiveCount +
+  neutralCount +
+  negativeCount +
+  veryNegativeCount;
 
-  const veryNegativeCount = reviews.filter(
-    (r) => r.sentiment === "very_negative"
-  ).length;
+// Percent helper
+const percent = (value: number) =>
+  totalReviews > 0 ? Math.round((value / totalReviews) * 100) : 0;
 
-  // Safe Percentages (avoid NaN)
-  const veryPositivePercent =
-    totalReviews > 0
-      ? Math.round((veryPositiveCount / totalReviews) * 100)
-      : 0;
+// Percentages
+const veryPositivePercent = percent(veryPositiveCount);
+const positivePercent = percent(positiveCount);
+const neutralPercent = percent(neutralCount);
+const negativePercent = percent(negativeCount);
+const veryNegativePercent = percent(veryNegativeCount);
 
-  const positivePercent =
-    totalReviews > 0
-      ? Math.round((positiveCount / totalReviews) * 100)
-      : 0;
-
-  const neutralPercent =
-    totalReviews > 0
-      ? Math.round((neutralCount / totalReviews) * 100)
-      : 0;
-
-  const negativePercent =
-    totalReviews > 0
-      ? Math.round((negativeCount / totalReviews) * 100)
-      : 0;
-
-  const veryNegativePercent =
-    totalReviews > 0
-      ? Math.round((veryNegativeCount / totalReviews) * 100)
-      : 0;
-
-  // Chart Data
-  const sentimentData = [
-    { name: "Very Positive", value: veryPositiveCount },
-    { name: "Positive", value: positiveCount },
-    { name: "Neutral", value: neutralCount },
-    { name: "Negative", value: negativeCount },
-    { name: "Very Negative", value: veryNegativeCount },
-  ];
-
+// Chart Data
+const sentimentData = [
+  { name: "Very Positive", value: veryPositiveCount },
+  { name: "Positive", value: positiveCount },
+  { name: "Neutral", value: neutralCount },
+  { name: "Negative", value: negativeCount },
+  { name: "Very Negative", value: veryNegativeCount },
+];
   // Chart Colors (IMPORTANT: must be OUTSIDE return)
   const COLORS = [
     "#16a34a", // Very Positive
@@ -89,7 +80,14 @@ const SentimentDashboard: React.FC = () => {
   ];
 
   return (
-<div className="min-h-screen p-8 space-y-8 bg-gradient-to-br from-[#2d0a6b] via-[#5b247a] to-[#e94e77]">
+    
+
+<div className="min-h-screen p-8 space-y-8 bg-linear-to-br from-[#2d0a6b] via-[#5b247a] to-[#e94e77]">
+
+        {/* mention trainer to get analysis */}
+
+      <AnalysisDataFetch name={name} setName={setName} setSentimentArray={setReviews}/>
+
       {/* Summary (Centered Percentages) */}
       <SummaryOverview
         veryPositivePercent={veryPositivePercent}
@@ -119,7 +117,7 @@ const SentimentDashboard: React.FC = () => {
       {/* Insights */}
       <SentimentInsights />
 
-      <ReportGeneration />
+      <ReportGeneration name={name1} setName={setName1}/>
     </div>
   );
 };

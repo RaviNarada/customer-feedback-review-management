@@ -20,7 +20,9 @@ export const getSentiment = async (
   next: NextFunction
 ) => {
   try {
-    const sentiments = await analysisService.getAllSentiment();
+    const name  = req.body?.name;
+
+    const sentiments = await analysisService.getAllSentiment(name);
     res.status(200).json(sentiments);
   } catch (error) {
     next(error);
