@@ -39,17 +39,27 @@ export default function ResponsePage() {
   return (
     <div className="response-page">
       <Header />
-      <div className="response-container">
-        <div className="response-top">
+      
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">Trainee Feedback</h1>
+          <p className="hero-subtitle">Review and respond to student feedback for trainers</p>
           <StatsGrid stats={stats} />
-          <div className="controls">
-            <SearchBox value={search} onChange={e => setSearch(e.target.value)} />
-            <FilterDropdown
-              options={[{ value: 'all', label: 'All' }, { value: 'replied', label: 'Replied' }, { value: 'pending', label: 'Pending' }]}
-              selected={filter}
-              onChange={(v) => setFilter(v as any)}
-            />
-          </div>
+        </div>
+      </div>
+
+      <div className="response-container">
+        <div className="controls">
+          <SearchBox value={search} onChange={e => setSearch(e.target.value)} />
+          <FilterDropdown
+            options={[
+              { value: 'all', label: 'All Feedbacks' },
+              { value: 'replied', label: 'Replied' },
+              { value: 'pending', label: 'Pending' }
+            ]}
+            selected={filter}
+            onChange={(v) => setFilter(v as any)}
+          />
         </div>
 
         <div className="feedback-list">

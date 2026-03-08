@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 // import LoginPage from './components/auth/LoginPage';
 import ResponsePage from './components/response/ResponsePage';
 
@@ -6,6 +6,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Navigate to="/response" replace />} />
         {/* <Route path="/" element={<LoginPage />} /> */}
         <Route path="/response" element={<ResponsePage />} />
       </Routes>

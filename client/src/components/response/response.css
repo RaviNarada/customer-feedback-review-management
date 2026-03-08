@@ -1,5 +1,5 @@
 :root {
-  --bg: #9006e0;
+  --bg: #0a0a12;
   --surface: #13131f;
   --surface2: #1a1a2e;
   --border: #ffffff0f;
@@ -8,7 +8,7 @@
   --pink: #ec4899;
   --text: #f1f5f9;
   --text-muted: #94a3b8;
-  --hero-bg: linear-gradient(135deg, #1e1065 0%, #4c0080 50%, #7e22ce 100%);
+  --hero-bg: linear-gradient(135deg, #4c1d95 0%, #6b21a8 50%, #7e22ce 100%);
 }
 
 body {
@@ -16,18 +16,76 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-.content { max-width: 1100px; margin: 0 auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 14px; }
+.response-page { 
+  min-height: 100vh;
+  background: var(--bg);
+}
 
-.response-page { min-height: 100vh; }
-.response-container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-.response-top { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
-.controls { display: flex; gap: 12px; margin-left: auto; align-items: center; }
-.feedback-list { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+.hero-section {
+  background: var(--hero-bg);
+  padding: 48px 32px 64px;
+  border-bottom: 1px solid var(--border);
+}
 
-.loading, .empty { text-align: center; color: var(--text-muted); padding: 60px 0; font-size: 1rem; }
+.hero-content {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 40px 0;
+}
+
+.response-container { 
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 32px;
+}
+
+.controls { 
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.feedback-list { 
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loading, .empty { 
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px 0;
+  font-size: 1rem;
+}
 
 @media (max-width: 768px) {
-  .response-top { flex-direction: column; }
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .controls {
+    flex-direction: column;
+  }
+  
+  .response-container {
+    padding: 24px 16px;
+  }
 }
