@@ -7,10 +7,10 @@ export function StatCard({ icon, value, label, color }: {
   color: string;
 }) {
   return (
-    <div className="stat-card">
-      <div className="stat-icon" style={{ color }}>{icon}</div>
-      <div className="stat-value">{value}</div>
-      <div className="stat-label">{label}</div>
+    <div className="bg-black/30 border border-white/10 rounded-2xl px-6 py-7 text-center backdrop-blur-[10px]">
+      <div className="mb-3 flex justify-center" style={{ color }}>{icon}</div>
+      <div className="font-['Syne'] text-4xl font-extrabold text-white leading-none my-2">{value}</div>
+      <div className="text-sm text-white/70 mt-1">{label}</div>
     </div>
   );
 }

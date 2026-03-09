@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './response.css';
 import { Header } from './Header';
 import { StatsGrid } from './StatsGrid';
 import { FilterDropdown } from './FilterDropdown';
@@ -37,19 +36,19 @@ export default function ResponsePage() {
   };
 
   return (
-    <div className="response-page">
+    <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">Trainee Feedback</h1>
-          <p className="hero-subtitle">Review and respond to student feedback for trainers</p>
+      <div className="bg-gradient-to-br from-[#2d0a6b] via-[#5b247a] to-[#e94e77] px-8 pt-12 pb-16 border-b border-white/20">
+        <div className="max-w-[1100px] mx-auto">
+          <h1 className="font-['Syne'] text-4xl font-bold text-white m-0 mb-2">Trainee Feedback</h1>
+          <p className="text-base text-white/70 m-0 mb-10">Review and respond to student feedback for trainers</p>
           <StatsGrid stats={stats} />
         </div>
       </div>
 
-      <div className="response-container">
-        <div className="controls">
+      <div className="max-w-[1100px] mx-auto px-8 py-8">
+        <div className="flex gap-3 items-center mb-6">
           <SearchBox value={search} onChange={e => setSearch(e.target.value)} />
           <FilterDropdown
             options={[
@@ -62,9 +61,9 @@ export default function ResponsePage() {
           />
         </div>
 
-        <div className="feedback-list">
-          {loading && <div className="loading">Loading feedback…</div>}
-          {!loading && feedbacks.length === 0 && <div className="empty">No feedback found.</div>}
+        <div className="flex flex-col gap-3">
+          {loading && <div className="text-center text-gray-600 py-16">Loading feedback…</div>}
+          {!loading && feedbacks.length === 0 && <div className="text-center text-gray-600 py-16">No feedback found.</div>}
           {!loading && feedbacks.map(f => (
             <FeedbackCard key={f.id} feedback={f} onClick={() => setSelected(f)} />
           ))}
