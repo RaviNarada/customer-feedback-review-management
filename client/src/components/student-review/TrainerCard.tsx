@@ -1,186 +1,204 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Trainer } from "./types/types";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { Trainer } from './types/types';
 
 interface TrainerCardProps {
   trainer: Trainer;
+  index: number;
 }
 
-const TrainerCard: React.FC<TrainerCardProps> = ({ trainer }) => {
+const TrainerCard: React.FC<TrainerCardProps> = ({ trainer, index }) => {
   const navigate = useNavigate();
+  const [hovered, setHovered] = useState(false);
 
   const initials = trainer.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
     .toUpperCase()
     .slice(0, 2);
 
+  const completedCount = trainer.courses.filter((c) => c.hasFeedback).length;
+
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        background: "rgba(255,255,255,0.07)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        borderRadius: "20px",
-        padding: "24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow =
-          "0 20px 40px rgba(0,0,0,0.3)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+        background: 'rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        borderRadius: '20px',
+        padding: '24px',
+        transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+        boxShadow: hovered
+          ? '0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(233,78,119,0.2)'
+          : '0 4px 24px rgba(0,0,0,0.2)',
+        animation: `fadeUp 0.4s ease both`,
+        animationDelay: `${index * 0.08}s`,
       }}
     >
-      {/* Trainer Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
         <div
           style={{
-            width: "50px",
-            height: "50px",
-            borderRadius: "14px",
-            background: "linear-gradient(135deg, #e94e77, #5b247a)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "18px",
+            width: '52px',
+            height: '52px',
+            borderRadius: '14px',
+            background: 'linear-gradient(135deg, #e94e77, #9b2d5a)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
             fontWeight: 700,
-            color: "#fff",
+            color: '#fff',
             fontFamily: "'DM Sans', sans-serif",
             flexShrink: 0,
+            boxShadow: '0 4px 16px rgba(233,78,119,0.4)',
           }}
         >
           {initials}
         </div>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#fff",
-              fontFamily: "'DM Sans', sans-serif",
+              fontSize: '17px',
+              fontWeight: 600,
+              color: '#fff',
+              fontFamily: "'Playfair Display', serif",
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
             {trainer.name}
           </div>
           <div
             style={{
-              fontSize: "12px",
-              color: "#e94e77",
+              fontSize: '12px',
+              color: 'rgba(255,255,255,0.5)',
+              marginTop: '3px',
               fontFamily: "'DM Sans', sans-serif",
-              marginTop: "2px",
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
             {trainer.expertise}
           </div>
         </div>
+        <div
+          style={{
+            fontSize: '11px',
+            color: completedCount === trainer.courses.length ? '#22c55e' : 'rgba(255,255,255,0.4)',
+            fontFamily: "'DM Sans', sans-serif",
+            flexShrink: 0,
+          }}
+        >
+          {completedCount}/{trainer.courses.length}
+        </div>
       </div>
+
+      {/* Divider */}
+      <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', marginBottom: '16px' }} />
 
       {/* Courses */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        {trainer.courses.map((course) => (
-          <div
-            key={course.id}
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "12px",
-              padding: "14px 16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px",
-            }}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "rgba(255,255,255,0.5)",
-                  fontFamily: "'DM Sans', sans-serif",
-                  letterSpacing: "1.5px",
-                  textTransform: "uppercase",
-                  marginBottom: "3px",
-                }}
-              >
-                Course
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#fff",
-                  fontFamily: "'DM Sans', sans-serif",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {course.title}
-              </div>
-            </div>
-
-            <button
-              onClick={() =>
-                navigate(
-                  course.hasFeedback
-                    ? `/student-dashboard/view-feedback/${course.id}`
-                    : `/student-dashboard/feedback/${course.id}`
-                )
-              }
+      {trainer.courses.length === 0 ? (
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Sans', sans-serif" }}>
+          No courses assigned.
+        </p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {trainer.courses.map((course) => (
+            <div
+              key={course.id}
               style={{
-                padding: "8px 16px",
-                borderRadius: "10px",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "13px",
-                fontWeight: 600,
-                fontFamily: "'DM Sans', sans-serif",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-                transition: "all 0.2s ease",
-                ...(course.hasFeedback
-                  ? {
-                      background: "rgba(255,255,255,0.1)",
-                      color: "rgba(255,255,255,0.7)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                    }
-                  : {
-                      background: "linear-gradient(135deg, #e94e77, #c0356a)",
-                      color: "#fff",
-                      boxShadow: "0 4px 15px rgba(233,78,119,0.35)",
-                    }),
-              }}
-              onMouseEnter={(e) => {
-                const btn = e.currentTarget;
-                if (course.hasFeedback) {
-                  btn.style.background = "rgba(255,255,255,0.15)";
-                } else {
-                  btn.style.transform = "scale(1.03)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                const btn = e.currentTarget;
-                if (course.hasFeedback) {
-                  btn.style.background = "rgba(255,255,255,0.1)";
-                } else {
-                  btn.style.transform = "scale(1)";
-                }
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                padding: '10px 14px',
+                background: 'rgba(255,255,255,0.04)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              {course.hasFeedback ? "✓ View Feedback" : "Give Feedback"}
-            </button>
-          </div>
-        ))}
-      </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                <span style={{ fontSize: '14px' }}>{course.hasFeedback ? '✅' : '📋'}</span>
+                <span
+                  style={{
+                    fontSize: '13px',
+                    color: 'rgba(255,255,255,0.85)',
+                    fontFamily: "'DM Sans', sans-serif",
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {course.title}
+                </span>
+              </div>
+              {course.hasFeedback ? (
+                <button
+                  onClick={() => navigate(`/responses/${course.id}`)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(233,78,119,0.5)',
+                    background: 'transparent',
+                    color: '#e94e77',
+                    fontSize: '12px',
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    whiteSpace: 'nowrap',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(233,78,119,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  View Response
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate(`/trainee-dashboard/feedback/${course.id}`)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #e94e77, #c0386a)',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 3px 12px rgba(233,78,119,0.35)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(233,78,119,0.55)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 3px 12px rgba(233,78,119,0.35)';
+                  }}
+                >
+                  Give Feedback
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 interface StarRatingProps {
   value: number;
-  onChange?: (rating: number) => void;
+  onChange?: (val: number) => void;
   readonly?: boolean;
   size?: number;
 }
@@ -15,55 +15,32 @@ const StarRating: React.FC<StarRatingProps> = ({
 }) => {
   const [hovered, setHovered] = useState(0);
 
-  const stars = [1, 2, 3, 4, 5];
-  const active = hovered || value;
-
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: "6px",
-        alignItems: "center",
-      }}
-    >
-      {stars.map((star) => (
-        <span
-          key={star}
-          onClick={() => !readonly && onChange?.(star)}
-          onMouseEnter={() => !readonly && setHovered(star)}
-          onMouseLeave={() => !readonly && setHovered(0)}
-          style={{
-            fontSize: `${size}px`,
-            cursor: readonly ? "default" : "pointer",
-            color: star <= active ? "#e94e77" : "rgba(255,255,255,0.2)",
-            transition: "color 0.15s ease, transform 0.15s ease",
-            transform:
-              !readonly && star <= active ? "scale(1.15)" : "scale(1)",
-            display: "inline-block",
-            filter:
-              star <= active
-                ? "drop-shadow(0 0 6px rgba(233,78,119,0.6))"
-                : "none",
-            userSelect: "none",
-          }}
-          aria-label={`${star} star${star !== 1 ? "s" : ""}`}
-          role={readonly ? "img" : "button"}
-        >
-          ★
-        </span>
-      ))}
-      {!readonly && value > 0 && (
-        <span
-          style={{
-            marginLeft: "8px",
-            fontSize: "14px",
-            color: "rgba(255,255,255,0.6)",
-            fontFamily: "'DM Sans', sans-serif",
-          }}
-        >
-          {value}/5
-        </span>
-      )}
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      {[1, 2, 3, 4, 5].map((star) => {
+        const filled = star <= (hovered || value);
+        return (
+          <span
+            key={star}
+            onClick={() => !readonly && onChange?.(star)}
+            onMouseEnter={() => !readonly && setHovered(star)}
+            onMouseLeave={() => !readonly && setHovered(0)}
+            style={{
+              fontSize: size,
+              cursor: readonly ? 'default' : 'pointer',
+              color: filled ? '#e94e77' : 'rgba(255,255,255,0.18)',
+              filter: filled ? 'drop-shadow(0 0 8px rgba(233,78,119,0.75))' : 'none',
+              transition: 'all 0.15s ease',
+              transform: !readonly && hovered === star ? 'scale(1.35)' : 'scale(1)',
+              display: 'inline-block',
+              lineHeight: 1,
+              userSelect: 'none',
+            }}
+          >
+            ★
+          </span>
+        );
+      })}
     </div>
   );
 };

@@ -1,214 +1,149 @@
-import React, { useEffect, useState } from "react";
-import { Trainer } from "./types/types";
-import { fetchTrainersWithStatus } from "./services/trainer.api";
-import TrainerCard from "./TrainerCard";
-import Sidebar from "./Sidebar";
-
-const globalStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
-  * { box-sizing: border-box; }
-  ::placeholder { color: rgba(255,255,255,0.3) !important; }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 999px; }
-`;
+import React, { useEffect, useState } from 'react';
+import type { Trainer } from './types/types';
+import { fetchTrainersWithStatus } from './services/trainer.api';
+import Sidebar from './Sidebar';
+import TrainerCard from './TrainerCard';
 
 const StudentDashboard: React.FC = () => {
   const [trainers, setTrainers] = useState<Trainer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    loadTrainers();
-  }, []);
-
-  const loadTrainers = async () => {
+  const load = async () => {
+    setLoading(true);
+    setError('');
     try {
-      setLoading(true);
-      setError(null);
       const data = await fetchTrainersWithStatus();
       setTrainers(data);
     } catch (err: any) {
-      setError(err.message || "Failed to load trainers");
+      setError(err.message || 'Failed to load trainers');
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredTrainers = trainers.filter((t) =>
-    t.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    load();
+  }, []);
 
-  const totalCourses = trainers.reduce((sum, t) => sum + t.courses.length, 0);
-  const completedFeedbacks = trainers.reduce(
-    (sum, t) => sum + t.courses.filter((c) => c.hasFeedback).length,
-    0
+  const filtered = trainers.filter(
+    (t) =>
+      t.name.toLowerCase().includes(search.toLowerCase()) ||
+      t.expertise.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <>
-      <style>{globalStyles}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        * { box-sizing: border-box; }
+        ::placeholder { color: rgba(255,255,255,0.3); }
+      `}</style>
+
       <div
         style={{
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #2d0a6b 0%, #5b247a 50%, #2d0a6b 100%)",
-          position: "relative",
-          overflow: "hidden",
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #1a0540, #3d1060, #1a0540)',
+          fontFamily: "'DM Sans', sans-serif",
+          color: '#fff',
         }}
       >
-        {/* Decorative orbs */}
         <div
           style={{
-            position: "fixed",
-            top: "-200px",
-            right: "-200px",
-            width: "500px",
-            height: "500px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(233,78,119,0.15) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "fixed",
-            bottom: "-150px",
-            left: "-150px",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(91,36,122,0.3) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            gap: "28px",
-            padding: "32px",
-            maxWidth: "1400px",
-            margin: "0 auto",
-            alignItems: "flex-start",
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '32px 24px',
+            display: 'flex',
+            gap: '28px',
+            alignItems: 'flex-start',
           }}
         >
-          <Sidebar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            totalTrainers={trainers.length}
-            totalCourses={totalCourses}
-            completedFeedbacks={completedFeedbacks}
-          />
+          {/* Sidebar */}
+          <Sidebar trainers={trainers} search={search} onSearchChange={setSearch} />
 
-          {/* Main content */}
+          {/* Main Content */}
           <main style={{ flex: 1, minWidth: 0 }}>
-            {/* Header */}
-            <div style={{ marginBottom: "28px" }}>
-              <div
+            {/* Page Header */}
+            <div style={{ marginBottom: '28px', animation: 'fadeUp 0.4s ease both' }}>
+              <p
                 style={{
-                  fontSize: "13px",
-                  letterSpacing: "3px",
-                  textTransform: "uppercase",
-                  color: "#e94e77",
-                  fontFamily: "'DM Sans', sans-serif",
-                  marginBottom: "6px",
+                  margin: '0 0 6px',
+                  fontSize: '12px',
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.4)',
                 }}
               >
-                Welcome Back
-              </div>
+                Your Trainers
+              </p>
               <h1
                 style={{
-                  fontSize: "36px",
-                  fontFamily: "'Playfair Display', serif",
-                  color: "#fff",
                   margin: 0,
+                  fontSize: '32px',
+                  fontFamily: "'Playfair Display', serif",
                   fontWeight: 700,
+                  lineHeight: 1.2,
                 }}
               >
-                Your Trainers & Courses
+                Course Feedback
               </h1>
-              {searchQuery && (
-                <p
-                  style={{
-                    marginTop: "8px",
-                    fontSize: "14px",
-                    color: "rgba(255,255,255,0.5)",
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}
-                >
-                  Showing results for "{searchQuery}"
-                </p>
-              )}
             </div>
 
-            {/* Loading state */}
+            {/* Loading */}
             {loading && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: "300px",
-                  gap: "16px",
-                }}
-              >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '40px 0' }}>
                 <div
                   style={{
-                    width: "48px",
-                    height: "48px",
-                    border: "3px solid rgba(255,255,255,0.1)",
-                    borderTop: "3px solid #e94e77",
-                    borderRadius: "50%",
-                    animation: "spin 0.8s linear infinite",
+                    width: '32px',
+                    height: '32px',
+                    border: '3px solid rgba(255,255,255,0.1)',
+                    borderTop: '3px solid #e94e77',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
                   }}
                 />
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                <span
-                  style={{
-                    color: "rgba(255,255,255,0.5)",
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}
-                >
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px' }}>
                   Loading trainers...
                 </span>
               </div>
             )}
 
-            {/* Error state */}
+            {/* Error */}
             {!loading && error && (
               <div
                 style={{
-                  background: "rgba(239,68,68,0.15)",
-                  border: "1px solid rgba(239,68,68,0.3)",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  textAlign: "center",
+                  background: 'rgba(239,68,68,0.12)',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textAlign: 'center',
                 }}
               >
-                <div style={{ fontSize: "32px", marginBottom: "12px" }}>⚠️</div>
-                <div
-                  style={{
-                    color: "#fca5a5",
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "15px",
-                    marginBottom: "16px",
-                  }}
-                >
-                  {error}
-                </div>
+                <div style={{ fontSize: '32px', marginBottom: '10px' }}>⚠️</div>
+                <p style={{ margin: '0 0 16px', color: 'rgba(255,255,255,0.7)' }}>{error}</p>
                 <button
-                  onClick={loadTrainers}
+                  onClick={load}
                   style={{
-                    padding: "10px 24px",
-                    background: "rgba(239,68,68,0.2)",
-                    border: "1px solid rgba(239,68,68,0.4)",
-                    borderRadius: "10px",
-                    color: "#fca5a5",
-                    cursor: "pointer",
+                    padding: '10px 24px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #e94e77, #c0386a)',
+                    color: '#fff',
                     fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "14px",
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
                   }}
                 >
                   Retry
@@ -216,60 +151,29 @@ const StudentDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Empty state */}
-            {!loading && !error && filteredTrainers.length === 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: "300px",
-                  gap: "12px",
-                  background: "rgba(255,255,255,0.05)",
-                  borderRadius: "20px",
-                  border: "1px dashed rgba(255,255,255,0.15)",
-                }}
-              >
-                <div style={{ fontSize: "48px" }}>
-                  {searchQuery ? "🔎" : "👨‍🏫"}
+            {/* Empty */}
+            {!loading && !error && filtered.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>
+                  {search ? '🔍' : '📭'}
                 </div>
-                <div
-                  style={{
-                    fontSize: "18px",
-                    color: "rgba(255,255,255,0.7)",
-                    fontFamily: "'Playfair Display', serif",
-                  }}
-                >
-                  {searchQuery
-                    ? `No trainers matching "${searchQuery}"`
-                    : "No trainers available yet"}
-                </div>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    color: "rgba(255,255,255,0.35)",
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}
-                >
-                  {searchQuery
-                    ? "Try a different search term"
-                    : "Check back later"}
-                </div>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '16px' }}>
+                  {search ? `No trainers match "${search}"` : 'No trainers assigned yet.'}
+                </p>
               </div>
             )}
 
-            {/* Trainer grid */}
-            {!loading && !error && filteredTrainers.length > 0 && (
+            {/* Cards Grid */}
+            {!loading && !error && filtered.length > 0 && (
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-                  gap: "20px",
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+                  gap: '20px',
                 }}
               >
-                {filteredTrainers.map((trainer) => (
-                  <TrainerCard key={trainer.id} trainer={trainer} />
+                {filtered.map((trainer, i) => (
+                  <TrainerCard key={trainer.id} trainer={trainer} index={i} />
                 ))}
               </div>
             )}
