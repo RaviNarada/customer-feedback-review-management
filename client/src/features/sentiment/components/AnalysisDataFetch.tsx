@@ -9,8 +9,8 @@ const AnalysisDataFetch = ({
   const [loading, setLoading] = useState<"analyze" | "download" | null>(null);
 
   const handleImport = async () => {
-    if (!name?.trim()) {
-      alert("Please enter a trainer name (or search term).");
+    if (!name.trim()) {
+      alert("Please enter a trainer name.");
       return;
     }
     try {
@@ -22,24 +22,20 @@ const AnalysisDataFetch = ({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        alert(errorData.message || "Fetching analysis failed");
+        alert("Fetching analysis failed");
         return;
       }
 
       const data: SentimentCount[] = await response.json();
       setSentimentArray(data);
-    } catch (err) {
-      console.error(err);
-      alert("Network error while fetching analysis");
     } finally {
       setLoading(null);
     }
   };
 
   const handleExport = async () => {
-    if (!name?.trim()) {
-      alert("Please enter a trainer name before downloading.");
+    if (!name.trim()) {
+      alert("Enter a trainer name before downloading.");
       return;
     }
     try {
@@ -51,8 +47,7 @@ const AnalysisDataFetch = ({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        alert(errorData.message || "Export failed");
+        alert("Export failed");
         return;
       }
 
@@ -61,13 +56,8 @@ const AnalysisDataFetch = ({
       const a = document.createElement("a");
       a.href = url;
       a.download = `report-${name}.csv`;
-      document.body.appendChild(a);
       a.click();
-      a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-      alert("Network error while downloading report");
     } finally {
       setLoading(null);
     }
@@ -75,44 +65,72 @@ const AnalysisDataFetch = ({
 
   return (
     <>
-      <div className="shadow-xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-        <div className="pl-8 mt-3">
-          <p className="text-xl font-semibold text-white">📄 Analysis Generator</p>
+      <div
+        className="
+          shadow-xl rounded-2xl bg-white/10 backdrop-blur-md 
+          border border-white/20 
+          p-6 min-h-[180px]
+          flex flex-col gap-4 w-full
+        "
+      >
+        <p className="text-xl font-semibold text-white">📄 Analysis Generator</p>
 
-          <div className="mt-3 pr-8 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter trainer / search keyword"
-              className="flex-1 py-3 px-3 border border-gray-300 rounded-xl bg-gray-300/40
-                         text-black focus:bg-white focus:outline-none focus:ring-2 transition duration-200"
-            />
+        {/* Full-width row container */}
+        <div className="flex flex-col md:flex-row items-center md:items-center w-full gap-4">
 
-            <div className="flex gap-3">
-              <button
-                onClick={handleImport}
-                disabled={loading !== null}
-                className={`px-4 py-3 rounded-xl text-white font-medium shadow-md transition duration-200
-                            ${loading === "analyze" ? "bg-indigo-400 cursor-not-allowed"
-                              : "bg-purple-700 hover:bg-indigo-500 active:scale-95"}`}
-              >
-                {loading === "analyze" ? "Loading…" : "Show analysis"}
-              </button>
+          {/* SEARCH BAR — takes all remaining space */}
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            type="text"
+            placeholder="Enter trainer / search keyword"
+            className="
+              flex-grow                /* 🔥 search bar stretches fully */
+              py-3 px-4 rounded-xl
+              bg-gray-300/40 border border-gray-300
+              text-black focus:bg-white focus:ring-2 outline-none
+              transition
+              w-full
+            "
+          />
 
-              <button
-                onClick={handleExport}
-                disabled={loading !== null}
-                className={`px-4 py-3 rounded-xl text-white font-medium shadow-md transition duration-200
-                            ${loading === "download" ? "bg-slate-400 cursor-not-allowed"
-                              : "bg-emerald-600 hover:bg-emerald-500 active:scale-95"}`}
-              >
-                {loading === "download" ? "Downloading…" : "Download"}
-              </button>
-            </div>
+          {/* BUTTONS — stick to RIGHT EDGE */}
+          <div className="flex gap-4 shrink-0">
+
+            <button
+              onClick={handleImport}
+              disabled={loading === "analyze"}
+              className={`
+                w-[170px] h-[50px]      /* 👈 bigger width + height */
+                rounded-xl 
+                text-white text-lg font-semibold
+                shadow-lg transition
+                ${loading === "analyze"
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-purple-700 hover:bg-purple-600 active:scale-95"}
+              `}
+            >
+              {loading === "analyze" ? "Loading…" : "Show analysis"}
+            </button>
+
+            <button
+              onClick={handleExport}
+              disabled={loading === "download"}
+              className={`
+                w-[170px] h-[50px]
+                rounded-xl 
+                text-white text-lg font-semibold
+                shadow-lg transition
+                ${loading === "download"
+                  ? "bg-slate-400 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-500 active:scale-95"}
+              `}
+            >
+              {loading === "download" ? "Downloading…" : "Download"}
+            </button>
+
           </div>
         </div>
-        <br />
       </div>
     </>
   );
