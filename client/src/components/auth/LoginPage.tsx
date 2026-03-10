@@ -38,7 +38,7 @@ const LoginPage = () => {
 
       {/* Login Card */}
       <div className="flex-grow flex items-center justify-center">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-96 text-gray-800">
+        <div className="bg-[rgba(255,255,255,0.1)] p-8 rounded-xl shadow-lg w-96 text-white">
           <h2 className="text-2xl font-bold mb-6 text-center">
             {isAdmin ? "Admin Login" : "Student Login"}
           </h2>
@@ -48,7 +48,7 @@ const LoginPage = () => {
               <label className="block text-sm font-medium">Username</label>
               <input 
                 type="text" 
-                className="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full border border-[#6a0dad]/40 bg-[rgba(255,255,255,0.1)] p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder:text-white/60"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -58,7 +58,7 @@ const LoginPage = () => {
               <label className="block text-sm font-medium">Password</label>
               <input 
                 type="password" 
-                className="w-full border p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full border border-[#6a0dad]/40 bg-[rgba(255,255,255,0.1)] p-2 rounded mt-1 outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder:text-white/60"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

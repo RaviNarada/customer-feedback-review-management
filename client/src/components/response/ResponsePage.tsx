@@ -36,7 +36,7 @@ export default function ResponsePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-white">
       <Header />
       
       <div className="bg-gradient-to-br from-[#2d0a6b] via-[#5b247a] to-[#e94e77] px-8 pt-12 pb-16 border-b border-white/20">
@@ -62,8 +62,8 @@ export default function ResponsePage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          {loading && <div className="text-center text-gray-600 py-16">Loading feedback…</div>}
-          {!loading && feedbacks.length === 0 && <div className="text-center text-gray-600 py-16">No feedback found.</div>}
+          {loading && <div className="text-center text-white/70 py-16">Loading feedback…</div>}
+          {!loading && feedbacks.length === 0 && <div className="text-center text-white/70 py-16">No feedback found.</div>}
           {!loading && feedbacks.map(f => (
             <FeedbackCard key={f.id} feedback={f} onClick={() => setSelected(f)} />
           ))}

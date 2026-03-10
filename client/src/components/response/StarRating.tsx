@@ -1,17 +1,14 @@
 import { Star } from 'lucide-react';
 
-const STAR_FILLED_COLOR = '#ec4899';
-const STAR_EMPTY_COLOR = '#4b5563';
-
-export function StarRating({ rating }: { rating: number }) {
+export function StarRating({ rating, filledColor = '#ec4899', emptyColor = '#4b5563' }: { rating: number; filledColor?: string; emptyColor?: string }) {
   return (
     <div className="flex gap-0.5">
       {[1,2,3,4,5].map(i => (
         <Star
           key={i}
           size={16}
-          fill={i <= rating ? STAR_FILLED_COLOR : 'none'}
-          color={i <= rating ? STAR_FILLED_COLOR : STAR_EMPTY_COLOR}
+          fill={i <= rating ? filledColor : 'none'}
+          color={i <= rating ? filledColor : emptyColor}
         />
       ))}
     </div>
