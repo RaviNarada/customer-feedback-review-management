@@ -1,10 +1,8 @@
-import SentimentDashboard from "./features/sentiment/pages/SentimentDashboard";
+import SentimentDashboard from "./pages/SentimentDashboard";
 
 function App() {
   return (
-    <div>
-      <SentimentDashboard />
-    </div>
+    <SentimentDashboard />
   );
 }
 

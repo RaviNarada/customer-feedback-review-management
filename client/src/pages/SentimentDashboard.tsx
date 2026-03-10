@@ -1,10 +1,11 @@
 import React from "react";
-import {useState} from "react";
-import SummaryOverview from "../components/SummaryOverview";
+import { useState } from "react";
 
-import SentimentDistribution from "../components/SentimentDistribution";
-import AnalysisDataFetch from "../components/AnalysisDataFetch";
-import type { SentimentCount } from "../components/types";
+import SummaryOverview from "../components/sentiment_analysis/SummaryOverview";
+import SentimentDistribution from "../components/sentiment_analysis/SentimentDistribution";
+import AnalysisDataFetch from "../components/sentiment_analysis/AnalysisDataFetch";
+
+import type { SentimentCount } from "../components/sentiment_analysis/types";
 
 const SentimentDashboard: React.FC = () => {
     
