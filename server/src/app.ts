@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
 import studentReviewRoutes from './routes/studentReview.routes';
 
 dotenv.config();
@@ -14,6 +15,7 @@ app.get('/', (req, res) => {
   res.send('🚀 Backend Server is Live and Healthy!');
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/student-review', studentReviewRoutes);
 
 export default app;

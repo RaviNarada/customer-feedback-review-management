@@ -23,7 +23,9 @@ function App() {
           <ProtectedRoute allowedRole="TRAINEE"><FeedbackForm /></ProtectedRoute>
         } />
         <Route path="/" element={<Navigate to="/login" />} />
-      </Routes>
+         {/* <Route path="/trainee-dashboard" element={<StudentDashboard/>} /> */}
+      </Routes> 
+     
     </Router>
   );
 }
