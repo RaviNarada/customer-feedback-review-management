@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TrainerCard from "./TrainerCard";
 import type { Trainer, Course } from "./types";
-import "./TrainerDashboard.css";
+import "./Trainerdashboard.css";
 
 const TrainerDashboard: React.FC = () => {
     const [trainers, setTrainers] = useState<Trainer[]>([]);
