@@ -7,7 +7,8 @@ export const protect = (req: any, res: Response, next: NextFunction) => {
   if (token && token.startsWith('Bearer')) {
     try {
       token = token.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+      // const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
       req.user = decoded;
       next();
     } catch (error) {
