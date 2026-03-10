@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "start": "ts-node --esm src/server.ts"
+    "start": "tsx src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,8 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "json2csv": "^6.0.0-alpha.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
