@@ -20,7 +20,7 @@ const TrainerDashboard: React.FC = () => {
     useEffect(() => {
         const fetchTrainers = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/trainers");
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/trainers`);
                 const data = await res.json();
                 setTrainers(data.data);
             } catch (err) {

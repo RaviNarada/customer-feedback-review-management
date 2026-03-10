@@ -15,7 +15,7 @@ const AnalysisDataFetch = ({
     }
     try {
       setLoading("analyze");
-      const response = await fetch("http://localhost:5000/api/analysis/sentiment", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/analysis/sentiment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
@@ -40,7 +40,7 @@ const AnalysisDataFetch = ({
     }
     try {
       setLoading("download");
-      const response = await fetch("http://localhost:5000/api/analysis/export", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/analysis/export`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
