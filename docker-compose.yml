@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: feedback-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-feedback_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-feedback_password}
+      POSTGRES_DB: ${POSTGRES_DB:-feedback_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - feedback-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-feedback_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Backend API
+  feedback-server:
+    image: feedback-server:latest
+    container_name: feedback-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-feedback_user}:${POSTGRES_PASSWORD:-feedback_password}@postgres:5432/${POSTGRES_DB:-feedback_db}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+    ports:
+      - "8080:8080"
+    networks:
+      - feedback-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend
+  feedback-client:
+    image: feedback-client:latest
+    container_name: feedback-client
+    depends_on:
+      - feedback-server
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080/api}
+    ports:
+      - "80:80"
+    networks:
+      - feedback-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  feedback-net:
+    driver: bridge

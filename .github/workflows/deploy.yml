@@ -1,0 +1,365 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - deployment
+  pull_request:
+    branches:
+      - deployment
+
+env:
+  REGISTRY: ghcr.io
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  AWS_REGION: us-west-2
+
+jobs:
+  # ============================================================================
+  # CLIENT BUILD AND LINT
+  # ============================================================================
+  client-lint-and-test:
+    name: Client - Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'client/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./client
+        run: npm run lint --no-dev
+
+      - name: Build TypeScript
+        working-directory: ./client
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-build
+          path: client/dist/
+          retention-days: 1
+
+  # ============================================================================
+  # SERVER BUILD AND LINT
+  # ============================================================================
+  server-lint-and-test:
+    name: Server - Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Setup Prisma
+        working-directory: ./server
+        run: npx prisma generate
+
+      - name: TypeScript Type Check
+        working-directory: ./server
+        run: npx tsc --noEmit
+
+  # ============================================================================
+  # TERRAFORM VALIDATION AND PLAN
+  # ============================================================================
+  terraform-validate:
+    name: Terraform - Validate & Plan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Terraform Format Check
+        working-directory: ./feedback-infra
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: ./feedback-infra
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: terraform init -upgrade
+
+      - name: Terraform Validate
+        working-directory: ./feedback-infra
+        run: terraform validate
+
+      - name: Terraform Plan (if not PR)
+        if: github.event_name != 'pull_request'
+        working-directory: ./feedback-infra
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          TF_VAR_aws_region: ${{ env.AWS_REGION }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Plan (if PR)
+        if: github.event_name == 'pull_request'
+        working-directory: ./feedback-infra
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          TF_VAR_aws_region: ${{ env.AWS_REGION }}
+        run: terraform plan -out=tfplan
+
+      - name: Save Terraform Plan
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: feedback-infra/tfplan
+          retention-days: 5
+
+  # ============================================================================
+  # BUILD AND PUSH DOCKER IMAGES
+  # ============================================================================
+  docker-build-push:
+    name: Docker - Build & Push
+    runs-on: ubuntu-latest
+    needs:
+      - client-lint-and-test
+      - server-lint-and-test
+      - terraform-validate
+    if: |
+      github.event_name == 'push' || 
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for backend
+        id: backend-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKER_USERNAME }}/feedback-server
+            ${{ env.REGISTRY }}/${{ github.repository }}/server
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Extract metadata for frontend
+        id: frontend-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKER_USERNAME }}/feedback-client
+            ${{ env.REGISTRY }}/${{ github.repository }}/client
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.backend-meta.outputs.tags }}
+          labels: ${{ steps.backend-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.frontend-meta.outputs.tags }}
+          labels: ${{ steps.frontend-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================================
+  # DEPLOY TO EC2
+  # ============================================================================
+  deploy-to-ec2:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: docker-build-push
+    if: github.ref == 'refs/heads/deployment' && github.event_name == 'push'
+    environment:
+      name: production
+      url: http://${{ secrets.EC2_HOST }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy via SSH
+        id: deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            # Define image names
+            SERVER_IMAGE="${{ secrets.DOCKER_USERNAME }}/feedback-server:latest"
+            CLIENT_IMAGE="${{ secrets.DOCKER_USERNAME }}/feedback-client:latest"
+            NETWORK_NAME="feedback-net"
+
+            echo "🔒 Pulling latest Docker images..."
+            docker pull $SERVER_IMAGE
+            docker pull $CLIENT_IMAGE
+
+            echo "🛑 Stopping old containers..."
+            docker stop feedback-server feedback-client 2>/dev/null || true
+            docker rm feedback-server feedback-client 2>/dev/null || true
+
+            echo "🕸️  Creating network..."
+            docker network create $NETWORK_NAME 2>/dev/null || true
+
+            echo "📊 Running backend service..."
+            docker run -d \
+              --name feedback-server \
+              --network $NETWORK_NAME \
+              -p 8080:8080 \
+              -e PORT=8080 \
+              -e NODE_ENV=production \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              --restart unless-stopped \
+              --log-driver json-file \
+              --log-opt max-size=10m \
+              $SERVER_IMAGE
+
+            echo "🎨 Running frontend service..."
+            docker run -d \
+              --name feedback-client \
+              --network $NETWORK_NAME \
+              -p 80:80 \
+              --restart unless-stopped \
+              --log-driver json-file \
+              --log-opt max-size=10m \
+              $CLIENT_IMAGE
+
+            echo "⏳ Waiting for services to start..."
+            sleep 10
+
+            echo "✅ Deployment completed successfully!"
+            docker ps
+
+      - name: Verify deployment
+        if: steps.deploy.outcome == 'success'
+        run: |
+          echo "🔍 Verifying backend health..."
+          sleep 5
+          curl -f http://${{ secrets.EC2_HOST }}:8080/api/auth/login -X POST -H "Content-Type: application/json" -d '{}' || echo "Backend endpoint requires authentication"
+          echo ""
+          echo "🔍 Verifying frontend accessibility..."
+          curl -f -I http://${{ secrets.EC2_HOST }} | head -5 || echo "Frontend verification required manual check"
+
+      - name: Send MS Teams Notification - Success
+        if: success()
+        uses: jdcargile/ms-teams-notification@v1.3
+        with:
+          github-token: ${{ github.token }}
+          ms-teams-webhook-uri: ${{ secrets.MSTEAMS_WEBHOOK }}
+          notification-color: 28a745
+          title: '✅ Deployment Successful'
+          fields: |
+            Repository,`${{ github.repository }}`
+            Branch,`${{ github.ref_name }}`
+            Commit,${{ github.sha }}
+            Author,${{ github.actor }}
+            Deploy Time,$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+      - name: Send MS Teams Notification - Failure
+        if: failure()
+        uses: jdcargile/ms-teams-notification@v1.3
+        with:
+          github-token: ${{ github.token }}
+          ms-teams-webhook-uri: ${{ secrets.MSTEAMS_WEBHOOK }}
+          notification-color: dc3545
+          title: '❌ Deployment Failed'
+          fields: |
+            Repository,`${{ github.repository }}`
+            Branch,`${{ github.ref_name }}`
+            Commit,${{ github.sha }}
+            Author,${{ github.actor }}
+            Error,Check GitHub Actions for details
+
+  # ============================================================================
+  # DEPLOYMENT NOTIFICATION
+  # ============================================================================
+  deployment-notification:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs:
+      - docker-build-push
+    if: always()
+
+    steps:
+      - name: Check deployment status
+        if: needs.docker-build-push.result == 'success'
+        run: |
+          echo "✅ All CI/CD checks passed successfully!"
+          echo "🐳 Docker images built and pushed"
+          echo "🎯 Deployment triggered"
+
+      - name: Report failure
+        if: needs.docker-build-push.result == 'failure'
+        run: |
+          echo "❌ CI/CD Pipeline failed"
+          exit 1

@@ -1,0 +1,155 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - deployment
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # ============================================================================
+  # PR VALIDATION
+  # ============================================================================
+  pr-validation:
+    name: PR Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+
+      - name: Validate commit messages
+        uses: wagoid/commitlint-github-action@v6
+
+  # ============================================================================
+  # FILE CHANGES VALIDATION
+  # ============================================================================
+  file-validation:
+    name: File Changes Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for dangerous files
+        run: |
+          # Check for secrets
+          if git diff --name-only origin/main...HEAD | xargs grep -l "PRIVATE KEY\|SECRET KEY\|API_KEY" 2>/dev/null; then
+            echo "❌ Danger: Secrets detected in code!"
+            exit 1
+          fi
+
+          # Check for large files
+          git diff --cached --name-only -z | while read -rd '' file; do
+            size=$(find "$file" -printf "%s" 2>/dev/null)
+            if [ "$size" -gt 52428800 ]; then
+              echo "❌ File too large: $file ($(($size / 1024 / 1024))MB)"
+              exit 1
+            fi
+          done
+
+      - name: Check for merge conflicts
+        run: |
+          if git diff HEAD | grep -q "^<<<<<<< HEAD"; then
+            echo "❌ Merge conflicts detected"
+            exit 1
+          fi
+
+  # ============================================================================
+  # DIFF REVIEW
+  # ============================================================================
+  diff-review:
+    name: Code Diff Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **/*.ts
+            **/*.tsx
+            **/*.js
+            **/*.jsx
+            **/*.tf
+            .github/workflows/**
+
+      - name: Comment with changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}'.split('\n');
+            let comment = '## Changed Files\n\n';
+            changedFiles.forEach(file => {
+              comment += `- \`${file}\`\n`;
+            });
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # ============================================================================
+  # BRANCH PROTECTION STATUS
+  # ============================================================================
+  branch-protection-status:
+    name: Branch Protection Status
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Update PR status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            let status = '✅ All checks passed!';
+            if (pullRequest.draft) {
+              status = '📋 Draft PR - not ready for review';
+            }
+            if (pullRequest.mergeable === false) {
+              status = '⚠️ This PR has conflicts that must be resolved';
+            }
+
+            console.log(status);

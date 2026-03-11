@@ -1,0 +1,17 @@
+# Global owners
+* @VallapiShambhavi
+
+# Frontend
+/client/ @VallapiShambhavi
+
+# Backend
+/server/ @VallapiShambhavi
+
+# Infrastructure
+/feedback-infra/ @VallapiShambhavi
+
+# CI/CD
+/.github/workflows/ @VallapiShambhavi
+
+# Documentation
+/docs/ @VallapiShambhavi

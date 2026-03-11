@@ -1,0 +1,90 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    pull-request-branch-name:
+      separator: "/"
+    reviewers:
+      - "maintainers"
+    assignees:
+      - "maintainers"
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "chore(deps):"
+      include: "scope"
+    allow:
+      - dependency-type: "all"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    pull-request-branch-name:
+      separator: "/"
+    reviewers:
+      - "maintainers"
+    assignees:
+      - "maintainers"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(deps):"
+      include: "scope"
+    allow:
+      - dependency-type: "all"
+    open-pull-requests-limit: 5
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    reviewers:
+      - "maintainers"
+    labels:
+      - "docker"
+      - "dependencies"
+    commit-message:
+      prefix: "chore(docker):"
+
+  - package-ecosystem: "docker"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    reviewers:
+      - "maintainers"
+    labels:
+      - "docker"
+      - "dependencies"
+    commit-message:
+      prefix: "chore(docker):"
+
+  # Enable version updates for Terraform
+  - package-ecosystem: "terraform"
+    directory: "/feedback-infra"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "03:00"
+    reviewers:
+      - "maintainers"
+    labels:
+      - "terraform"
+      - "infrastructure"
+    commit-message:
+      prefix: "chore(terraform):"
