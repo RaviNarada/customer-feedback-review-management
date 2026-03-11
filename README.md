@@ -25,4 +25,4 @@ docker-compose up -d
 ## Destroy (to avoid AWS charges)
 ```bash
 terraform destroy
-```
+``` 
