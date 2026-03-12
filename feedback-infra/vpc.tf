@@ -9,7 +9,7 @@ resource "aws_vpc" "main" {
 # Public Subnet (ALB lives here)
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "192.168.1.0/16"
+  cidr_block              = "192.168.1.0/24"
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
   tags = { Name = "feedback-public-subnet" }
@@ -18,7 +18,7 @@ resource "aws_subnet" "public" {
 # Public Subnet 2 (ALB needs 2 AZs)
 resource "aws_subnet" "public_2" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "192.168.2.0/16"
+  cidr_block              = "192.168.2.0/24"
   availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
   tags = { Name = "feedback-public-subnet-2" }
@@ -27,7 +27,7 @@ resource "aws_subnet" "public_2" {
 # Private Subnet (EC2 lives here)
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "192.168.3.0/16"
+  cidr_block        = "192.168.3.0/24"
   availability_zone = "${var.aws_region}a"
   tags = { Name = "feedback-private-subnet" }
 }
