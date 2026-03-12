@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:8
+    container_name: feedback-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: feedbackdb
+      MYSQL_USER: feedbackuser
+      MYSQL_PASSWORD: feedbackpass123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: shivayogesh/feedback-backend:latest
+    container_name: feedback-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: "mysql://feedbackuser:feedbackpass123@db:3306/feedbackdb"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: shivayogesh/feedback-frontend:latest
+    container_name: feedback-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
