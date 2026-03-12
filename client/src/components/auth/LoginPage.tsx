@@ -83,7 +83,7 @@ const LoginPage = () => {
        <div className="flex items-center gap-2 text-2xl font-bold italic tracking-tighter">
   <img
     src="./src/assets/Logo.PNG"
-    alt="Logoo"
+    
     className="h-10 object-contain"
   />
   <span>
